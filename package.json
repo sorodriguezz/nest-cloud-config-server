@@ -1,0 +1,40 @@
+{
+  "name": "@sorodriguez/nest-config-server",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "sorodriguezz",
+  "license": "ISC",
+  "description": "",
+  "keywords": [
+    "nestjs",
+    "config",
+    "server",
+    "configserver",
+    "microservices"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sorodriguezz/nest-config-server.git"
+  },
+  "homepage": "https://github.com/sorodriguezz/nest-config-server#readme",
+  "dependencies": {
+    "simple-git": "^3.29.0"
+  },
+  "peerDependencies": {
+    "@nestjs/core": "^11.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}
