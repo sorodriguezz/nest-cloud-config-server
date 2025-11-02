@@ -1,0 +1,23 @@
+# Source files
+src/
+tsconfig.json
+
+# Tests
+**/*.spec.ts
+**/*.test.ts
+
+# Development files
+.github/
+.git/
+.gitignore
+.vscode/
+
+# Build artifacts
+*.tgz
+sorodriguez-nest-config-server-*.tgz
+
+# Misc
+.DS_Store
+node_modules/
+repos/
+*.log
