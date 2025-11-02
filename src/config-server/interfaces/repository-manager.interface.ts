@@ -1,4 +1,4 @@
-import type { RepositoryType } from "../../common/factories/repository-builder.factory";
+import type { RepositoryType } from "../../common/factories/enums/repository-type.enum";
 
 export interface RepositoryManager {
   name: RepositoryType;
