@@ -1,5 +1,3 @@
-export interface ConfigQueryDto {
-  repo: string;
-  application: string;
-  profile: string;
-}
+import type { ConfigQuery } from "../../common/models/config-query.model";
+
+export type ConfigQueryDto = ConfigQuery;

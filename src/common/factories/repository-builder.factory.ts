@@ -18,6 +18,10 @@ export class RepositoryBuilderFactory {
 
     const BuilderCtor = builders[type];
 
-    return new BuilderCtor!();
+    if (!BuilderCtor) {
+      throw new Error(`Unsupported repository type: ${type}`);
+    }
+
+    return new BuilderCtor();
   }
 }

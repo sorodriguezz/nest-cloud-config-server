@@ -27,8 +27,12 @@ export const getRepositoryUrl = (
 ): string => {
   validateRepository(repository);
 
+  if (repository.project && urlBuilder.setProject) {
+    urlBuilder.setProject(repository.project);
+  }
+
   return urlBuilder
-    .setAsPublic(false)
+    .setAsPublic(!repository.auth)
     .setCredentials(
       repository.auth?.username || "",
       repository.auth?.token || ""

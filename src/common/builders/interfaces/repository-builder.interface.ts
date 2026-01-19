@@ -4,6 +4,7 @@ export interface IRepositoryUrlBuilder {
   setCredentials(username: string, token: string): IRepositoryUrlBuilder;
   setHost(host: string): IRepositoryUrlBuilder;
   setOrganization(org: string): IRepositoryUrlBuilder;
+  setProject?(project: string): IRepositoryUrlBuilder;
   setRepository(repo: string): IRepositoryUrlBuilder;
   build(): string;
 }

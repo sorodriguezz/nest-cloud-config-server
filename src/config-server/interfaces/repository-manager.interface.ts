@@ -5,6 +5,7 @@ export interface RepositoryManager {
   host: string;
   protocol: string;
   organization: string;
+  project?: string;
   repository: string;
   branch: string;
   auth?: {

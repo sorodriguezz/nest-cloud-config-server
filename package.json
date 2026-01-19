@@ -1,6 +1,6 @@
 {
   "name": "@sorodriguez/nest-cloud-config-server",
-  "version": "1.0.2",
+  "version": "1.2.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
