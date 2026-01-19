@@ -1,6 +1,7 @@
-import { BadGatewayException, Logger } from "@nestjs/common";
+import { BadGatewayException } from "@nestjs/common";
 import simpleGit, { type SimpleGit } from "simple-git";
 import { IRepositoryUrlBuilder } from "../common/builders/interfaces/repository-builder.interface";
+import { createLogger, type LoggerLike } from "../common/logging/config-logger";
 import {
   ensureDirectory,
   getConfigPath,
@@ -10,15 +11,17 @@ import { validateRepository } from "../common/utils/validations.util";
 import { RepositoryManager } from "../config-server/interfaces/repository-manager.interface";
 
 export class ManageRepository {
-  private readonly logger = new Logger(ManageRepository.name);
+  private readonly logger: LoggerLike;
   public git!: SimpleGit;
 
   constructor(
     private readonly _repository: RepositoryManager,
     private readonly _urlBuilder: IRepositoryUrlBuilder,
-    private readonly _basePath: string
+    private readonly _basePath: string,
+    logger?: LoggerLike
   ) {
-    ensureDirectory(this._basePath, this._repository.repository);
+    this.logger = logger ?? createLogger(ManageRepository.name, true);
+    ensureDirectory(this._basePath, this._repository.repository, this.logger);
     this.initGit();
   }
 

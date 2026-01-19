@@ -23,7 +23,11 @@ export class ConfigServerModule {
       provide: CONFIG_SOURCES,
       useFactory: (fileSource: FileSystemConfigSource) => {
         const extraSources = options.configSources ?? [];
-        return [fileSource, ...extraSources];
+        const sourceOrder = options.sourceOrder ?? "filesystem-first";
+
+        return sourceOrder === "filesystem-first"
+          ? [fileSource, ...extraSources]
+          : [...extraSources, fileSource];
       },
       inject: [FileSystemConfigSource],
     };

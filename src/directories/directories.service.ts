@@ -1,13 +1,26 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import * as fs from "fs";
 import * as path from "path";
 import { RepositoryRegistry } from "../config-server/repository-registry.service";
+import { createLogger, type LoggerLike } from "../common/logging/config-logger";
+import type { ConfigServerModuleOptions } from "../config-server/config-server.options";
+import { CONFIG_SERVER_OPTIONS } from "../config-server/config-server.tokens";
 
 @Injectable()
 export class DirectoriesService {
-  private readonly logger = new Logger(DirectoriesService.name);
+  private readonly logger: LoggerLike;
 
-  constructor(private readonly repositoryRegistry: RepositoryRegistry) {}
+  constructor(
+    private readonly repositoryRegistry: RepositoryRegistry,
+    @Optional()
+    @Inject(CONFIG_SERVER_OPTIONS)
+    options?: ConfigServerModuleOptions
+  ) {
+    this.logger = createLogger(
+      DirectoriesService.name,
+      options?.enableLogging !== false
+    );
+  }
 
   listDirectories(): { name: string; files: string[] }[] {
     try {

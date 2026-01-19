@@ -102,12 +102,56 @@ ConfigServerModule.forRoot({
 });
 ```
 
+## ⚙️ Configuration Options (Optional)
+
+```typescript
+ConfigServerModule.forRoot({
+  // Required
+  baseRepoPath: "../repos",
+  repositories: [],
+
+  // Optional
+  configSources: [], // Additional ConfigSource implementations
+  enableLogging: true, // Disable library logs if false
+  sourceStrategy: "first", // "first" | "merge"
+  sourceOrder: "filesystem-first", // "filesystem-first" | "filesystem-last"
+  mergeStrategy: "deep", // "deep" | "shallow"
+  filePatterns: [
+    "application.*",
+    "application-{profile}.*",
+    "{application}.*",
+    "{application}-{profile}.*",
+  ],
+  cacheTtlMs: 30000, // 0 disables cache
+  syncIntervalMs: 300000, // 0 disables auto-sync
+});
+```
+
+Defaults when omitted:
+
+- `configSources`: `[]` (only filesystem source is used)
+- `enableLogging`: `true` (library logs are enabled)
+- `sourceStrategy`: `"first"` (first source that returns config wins)
+- `sourceOrder`: `"filesystem-first"` (filesystem source is evaluated first)
+- `mergeStrategy`: `"deep"` (nested objects merge recursively)
+- `filePatterns`: `["application.*", "application-{profile}.*", "{application}.*", "{application}-{profile}.*"]`
+- `cacheTtlMs`: disabled (no cache)
+- `syncIntervalMs`: disabled (no auto-sync)
+
+Notes:
+
+- `sourceStrategy: "merge"` combines all sources in order; later values override earlier ones using `mergeStrategy`.
+- `cacheTtlMs` caches the flattened response and uses ETag + `If-None-Match` to return 304.
+- `syncIntervalMs` triggers periodic sync and clears cache after each sync.
+
 ## 📂 File Structure in Repository
 
-Organize your configuration files with the following pattern:
+Organize your configuration files using patterns. Default patterns and precedence:
 
 ```
 config-repo/
+├── application.yml
+├── application-prod.yml
 ├── my-app-dev.json
 ├── my-app-prod.yaml
 ├── my-app-test.properties
@@ -115,13 +159,18 @@ config-repo/
 └── another-app-prod.json
 ```
 
-**Pattern:** `{application}-{profile}.{extension}`
+**Default patterns (last wins):**
+
+- `application.*`
+- `application-{profile}.*`
+- `{application}.*`
+- `{application}-{profile}.*`
 
 ## 🌐 API Endpoints
 
 ### 1. Get Configuration
 
-**GET** `/?repo={repo}&application={app}&profile={profile}`
+**GET** `/config-file?repo={repo}&application={app}&profile={profile}`
 
 Get the configuration for a specific application in flat format.
 
@@ -134,7 +183,13 @@ Get the configuration for a specific application in flat format.
 **Example:**
 
 ```bash
-curl "http://localhost:3000/?repo=config-repo&application=my-app&profile=dev"
+curl "http://localhost:3000/config-file?repo=config-repo&application=my-app&profile=dev"
+```
+
+**ETag cache (optional):**
+
+```bash
+curl -H 'If-None-Match: "etag-value"' "http://localhost:3000/config-file?repo=config-repo&application=my-app&profile=dev"
 ```
 
 **Response (flat format):**
@@ -170,7 +225,25 @@ curl -X POST http://localhost:3000/sync
 }
 ```
 
-### 3. List Directories and Files
+### 3. Synchronize a Single Repository
+
+**POST** `/sync/{repo}?force=true`
+
+Synchronize one repository. Use `force=true` for hard reset + pull.
+
+**Example:**
+
+```bash
+curl -X POST "http://localhost:3000/sync/config-repo?force=true"
+```
+
+### 4. Health Status
+
+**GET** `/health`
+
+Returns sync status, errors, and locks.
+
+### 5. List Directories and Files
 
 **GET** `/directories`
 
@@ -330,8 +403,7 @@ import {
   ConfigServerModuleOptions,
   RepositoryManager,
   RepositoryType,
-  ConfigQueryDto,
-  IConfigFile,
+  ConfigSource,
 } from "@sorodriguez/nest-cloud-config-server";
 ```
 

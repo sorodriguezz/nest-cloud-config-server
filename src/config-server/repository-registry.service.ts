@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { join } from "path";
 import { RepositoryBuilderFactory } from "../common/factories/repository-builder.factory";
+import { createLogger, type LoggerLike } from "../common/logging/config-logger";
 import type { IRepositoryUrlBuilder } from "../common/builders/interfaces/repository-builder.interface";
 import type { RepositoryManager } from "./interfaces/repository-manager.interface";
 import type { ConfigServerModuleOptions } from "./config-server.options";
@@ -13,7 +14,7 @@ export interface RepositoryEntry {
 
 @Injectable()
 export class RepositoryRegistry {
-  private readonly logger = new Logger(RepositoryRegistry.name);
+  private readonly logger: LoggerLike;
   private readonly entries: RepositoryEntry[] = [];
   private baseRepoPath = "";
   private initialized = false;
@@ -22,6 +23,10 @@ export class RepositoryRegistry {
     @Inject(CONFIG_SERVER_OPTIONS)
     private readonly options?: ConfigServerModuleOptions
   ) {
+    this.logger = createLogger(
+      RepositoryRegistry.name,
+      this.options?.enableLogging !== false
+    );
     if (this.options) {
       this.initialize(this.options);
     }
@@ -66,13 +71,7 @@ export class RepositoryRegistry {
   }
 
   resolveRepositoryPath(repoName: string): string {
-    const entry = this.entries.find(
-      (repo) => repo.repository.repository === repoName
-    );
-
-    if (!entry) {
-      throw new NotFoundException(`Repository ${repoName} not configured`);
-    }
+    const entry = this.getEntry(repoName);
 
     return join(this.baseRepoPath, entry.repository.repository);
   }
@@ -81,5 +80,17 @@ export class RepositoryRegistry {
     return this.entries.some(
       (repo) => repo.repository.repository === repoName
     );
+  }
+
+  getEntry(repoName: string): RepositoryEntry {
+    const entry = this.entries.find(
+      (repo) => repo.repository.repository === repoName
+    );
+
+    if (!entry) {
+      throw new NotFoundException(`Repository ${repoName} not configured`);
+    }
+
+    return entry;
   }
 }

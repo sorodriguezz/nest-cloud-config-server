@@ -1,14 +1,27 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, Optional } from "@nestjs/common";
 import { promises as fs } from "fs";
 import * as path from "path";
 import type { IConfigFile } from "./interfaces/config-file.interface";
 import { ConfigFileParser } from "./config-file.parser";
+import { createLogger, type LoggerLike } from "../common/logging/config-logger";
+import type { ConfigServerModuleOptions } from "../config-server/config-server.options";
+import { CONFIG_SERVER_OPTIONS } from "../config-server/config-server.tokens";
 
 @Injectable()
 export class ConfigFileService {
-  private readonly logger = new Logger(ConfigFileService.name);
+  private readonly logger: LoggerLike;
 
-  constructor(private readonly parser: ConfigFileParser) {}
+  constructor(
+    private readonly parser: ConfigFileParser,
+    @Optional()
+    @Inject(CONFIG_SERVER_OPTIONS)
+    options?: ConfigServerModuleOptions
+  ) {
+    this.logger = createLogger(
+      ConfigFileService.name,
+      options?.enableLogging !== false
+    );
+  }
 
   async readConfigFile(
     repositoryPath: string,
